@@ -17,8 +17,8 @@ def respond(err, res=None):
 
 def lambda_handler(event, context):   
     id_ = event['pathParameters']['id']
-    decoded_body = base64.b64decode(event['body']).decode('utf-8')
-    body = json.loads(decoded_body)
+    # decoded_body = base64.b64decode(event['body']).decode('utf-8')
+    body = json.loads(event['body'])
     region = body['region']
 
     current_free_spaces = dynamo.get_item(

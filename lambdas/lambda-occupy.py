@@ -1,6 +1,5 @@
 import boto3
 import json
-import base64
 import os
 
 dynamo = boto3.client('dynamodb')
@@ -17,15 +16,13 @@ def respond(err, res=None):
 
 def lambda_handler(event, context):   
     id_ = event['pathParameters']['id']
-    # decoded_body = base64.b64decode(event['body']).decode('utf-8')
-    body = json.loads(event['body'])
-    region = body['region']
+    region = event['pathParameters']['region']
 
     current_free_spaces = dynamo.get_item(
         TableName=os.environ['table_name'],
         Key={
             'region': {'S': region},
-            'id': {'N': id_}
+            'id': {'S': id_}
         }
     )['Item']['cantidad_ocupada']['N']
 
@@ -33,7 +30,7 @@ def lambda_handler(event, context):
         TableName=os.environ['table_name'],
         Key={
             'region': {'S': region},
-            'id': {'N': id_}
+            'id': {'S': id_}
         },
         UpdateExpression='SET cantidad_ocupada = :val',
         ExpressionAttributeValues={
@@ -41,4 +38,6 @@ def lambda_handler(event, context):
         }    
     )
 
-    return respond(None, 'OK')
+    return respond(None, {
+        'cantidad_ocupada': int(current_free_spaces) - 1
+    })

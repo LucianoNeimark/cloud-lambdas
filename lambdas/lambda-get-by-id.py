@@ -15,13 +15,13 @@ def respond(err, res=None):
 
 def lambda_handler(event, context): 
     id_ = event['pathParameters']['id']
-    region = event['queryStringParameters']['region']
+    region = event['pathParameters']['region']
 
     parking = dynamo.get_item(
         TableName=os.environ['table_name'],
         Key={
             'region': {'S': region},
-            'id': {'N': id_}
+            'id': {'S': id_}
         }
     )
 

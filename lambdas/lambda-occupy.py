@@ -24,7 +24,7 @@ def lambda_handler(event, context):
             'region': {'S': region},
             'id': {'S': id_}
         }
-    )['Item']['cantidad_ocupada']['N']
+    )['Item']['occupied_qty']['N']
 
     dynamo.update_item(
         TableName=os.environ['table_name'],
@@ -32,12 +32,12 @@ def lambda_handler(event, context):
             'region': {'S': region},
             'id': {'S': id_}
         },
-        UpdateExpression='SET cantidad_ocupada = :val',
+        UpdateExpression='SET occupied_qty = :val',
         ExpressionAttributeValues={
             ':val': {'N': str(int(current_free_spaces) + 1)}
         }    
     )
 
     return respond(None, {
-        'cantidad_ocupada': int(current_free_spaces) - 1
+        'occupied_qty': int(current_free_spaces) - 1
     })

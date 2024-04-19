@@ -1,0 +1,38 @@
+.navbar {
+    background-color: #333;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.navbar-title {
+    color: white;
+    margin: 0;
+}
+
+.navbar-list {
+    list-style-type: none;
+    width: 100%;
+    margin: 0;
+    padding-left: 15px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.navbar-item {
+    margin-right: 10px;
+}
+
+.navbar-link {
+    text-decoration: none;
+    color: white;
+}
+
+.navbar-link.active {
+    color: lightgray;
+}
+
+.navbar-link:hover {
+    color: lightgray;
+}

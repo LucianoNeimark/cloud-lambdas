@@ -4,15 +4,14 @@ import os
 
 dynamo = boto3.client('dynamodb')
 
-def respond(err, res=None):
+def respond(statusCode, body):
     return {
-        'statusCode': '400' if err else '200',
-        'body': err.message if err else json.dumps(res),
+        'statusCode': str(statusCode),
+        'body': json.dumps(body),
         'headers': {
             'Content-Type': 'application/json',
         },
     }
-
 
 def lambda_handler(event, context):   
     id_ = event['pathParameters']['id']
@@ -51,6 +50,6 @@ def lambda_handler(event, context):
         }    
     )
 
-    return respond(None, {
+    return respond(200, {
         'occupied_qty': int(current_occupied) - 1
     })

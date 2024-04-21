@@ -4,28 +4,35 @@ import os
 
 dynamo = boto3.client('dynamodb')
 
-def respond(err, res=None):
+def respond(statusCode, body):
     return {
-        'statusCode': '400' if err else '200',
-        'body': err.message if err else json.dumps(res),
+        'statusCode': str(statusCode),
+        'body': json.dumps(body),
         'headers': {
             'Content-Type': 'application/json',
         },
     }
 
-
 def lambda_handler(event, context):   
     id_ = event['pathParameters']['id']
     region = event['pathParameters']['region']
 
-    current_free_spaces = dynamo.get_item(
+    item = dynamo.get_item(
         TableName=os.environ['table_name'],
         Key={
             'region': {'S': region},
             'id': {'S': id_}
         }
-    )['Item']['occupied_qty']['N']
+    )['Item']
 
+    occupied_qty = item['occupied_qty']['N']
+    capacity = item['capacity']['N']
+
+    if(int(occupied_qty) == int(capacity)):
+        return respond(400, {
+            'message': 'No free spaces'
+        })
+    
     dynamo.update_item(
         TableName=os.environ['table_name'],
         Key={
@@ -34,10 +41,10 @@ def lambda_handler(event, context):
         },
         UpdateExpression='SET occupied_qty = :val',
         ExpressionAttributeValues={
-            ':val': {'N': str(int(current_free_spaces) + 1)}
+            ':val': {'N': str(int(occupied_qty) + 1)}
         }    
     )
 
-    return respond(None, {
-        'occupied_qty': int(current_free_spaces) - 1
+    return respond(200, {
+        'occupied_qty': int(occupied_qty) + 1
     })

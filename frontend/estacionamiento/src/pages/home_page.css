@@ -57,6 +57,18 @@
     margin: 20px auto;
 }
 
+.parking-inner-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.button-container {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
 .parking-info {
     margin-bottom: 10px;
     font-size: 16px;
@@ -65,4 +77,41 @@
 .no-parking-lots {
     font-size: 16px;
     text-align: center;
+}
+
+.form-container {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.form-label {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.form-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.form-button:hover {
+    background-color: #0056b3;
 }

@@ -42,7 +42,7 @@ function HomePage() {
                     occupiedSpaces: data[i].occupied_qty.N
                 })
             }
-            setShowSuccess(true)
+            setShowSuccess(false)
             setParkingLots(parsedData);
         } catch (error) {
             setShowError(true)
@@ -141,14 +141,14 @@ function HomePage() {
 
     return (
         <>
-            <div style={{"position": "absolute", "right":"2em", "top":"2em"}}>
+            <div style={{ "position": "absolute", "right": "2em", "top": "2em" }}>
                 <SlAlert variant="danger" open={showError} duration="6000" onSlHide={() => setShowError(false)}>
                     <SlIcon slot="icon" name="exclamation-octagon"></SlIcon>
                     <strong>Ocurrio un error!</strong><br />
                     Intentalo de nuevo mas tarde
                 </SlAlert>
             </div>
-            <div style={{"position": "absolute", "right":"2em", "top":"2em"}}>
+            <div style={{ "position": "absolute", "right": "2em", "top": "2em" }}>
                 <SlAlert variant="success" open={showSuccess} duration="3000" onSlHide={() => setShowSuccess(false)}>
                     <SlIcon slot="icon" name="exclamation-octagon"></SlIcon>
                     <strong>Operacion realizada exitosamente</strong><br />

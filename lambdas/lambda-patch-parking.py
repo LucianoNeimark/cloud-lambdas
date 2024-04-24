@@ -26,7 +26,7 @@ def lambda_handler(event, context):
             item['capacity'] = {'N': str(body['capacity'])}
 
         dynamo.put_item(
-            TableName='estacionamiento',
+            TableName=os.environ['table_name'],
             Item=item
         )
         

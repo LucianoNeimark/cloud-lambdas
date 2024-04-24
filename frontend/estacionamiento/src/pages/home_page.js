@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './home_page.css';
 import { regionOptions } from '../constants';
-
+import SlAlert from '@shoelace-style/shoelace/dist/react/alert';
+import SlIcon from '@shoelace-style/shoelace/dist/react/icon';
 
 function HomePage() {
     const [parkingLots, setParkingLots] = useState([]);
@@ -15,7 +16,8 @@ function HomePage() {
     const [editMode, setEditMode] = useState(false);
     const [name, setName] = useState('');
     const [capacity, setCapacity] = useState(0);
-
+    const [showError, setShowError] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
     const base_url = process.env.REACT_APP_API_URL;
 
     useEffect(() => {
@@ -27,6 +29,7 @@ function HomePage() {
             // Fetch region parking lots from API
             const response = await fetch(`${base_url}/parking/${region}`);
             if (!response.ok) {
+                setShowError(true)
                 throw new Error('Failed to fetch region parking lots');
             }
             const data = await response.json();
@@ -39,8 +42,10 @@ function HomePage() {
                     occupiedSpaces: data[i].occupied_qty.N
                 })
             }
+            setShowSuccess(true)
             setParkingLots(parsedData);
         } catch (error) {
+            setShowError(true)
             console.error('Error fetching region parking lots:', error);
         }
     };
@@ -56,14 +61,17 @@ function HomePage() {
                 body: JSON.stringify({ name: name, capacity: capacity }),
             });
             if (!response.ok) {
+                setShowError(true)
                 throw new Error('Failed to edit parking lot');
             }
             parkingLots.find(lot => lot.id === selectedParkingLotId).name = name;
             parkingLots.find(lot => lot.id === selectedParkingLotId).totalSpaces = capacity;
             setParkingLots([...parkingLots]);
+            setShowSuccess(true)
             setTotalSpaces(capacity);
         } catch (error) {
             console.error('Error editing parking lot:', error);
+            setShowError(true)
         }
         setEditMode(false);
     };
@@ -97,13 +105,16 @@ function HomePage() {
                 }
             });
             if (!response.ok) {
+                setShowError(true)
                 throw new Error('Failed to increase occupied spaces');
             }
             const data = await response.json();
+            setShowSuccess(true)
             setOccupiedSpaces(data.occupied_qty);
         }
         catch (error) {
             console.error('Error increasing occupied spaces:', error);
+            setShowError(true)
         }
     };
 
@@ -116,9 +127,11 @@ function HomePage() {
                 }
             });
             if (!response.ok) {
+                setShowError(true)
                 throw new Error('Failed to increase occupied spaces');
             }
             const data = await response.json();
+            setShowSuccess(true)
             setOccupiedSpaces(data.occupied_qty);
         }
         catch (error) {
@@ -128,6 +141,19 @@ function HomePage() {
 
     return (
         <>
+            <div style={{"position": "absolute", "right":"2em", "top":"2em"}}>
+                <SlAlert variant="danger" open={showError} duration="6000" onSlHide={() => setShowError(false)}>
+                    <SlIcon slot="icon" name="exclamation-octagon"></SlIcon>
+                    <strong>Ocurrio un error!</strong><br />
+                    Intentalo de nuevo mas tarde
+                </SlAlert>
+            </div>
+            <div style={{"position": "absolute", "right":"2em", "top":"2em"}}>
+                <SlAlert variant="success" open={showSuccess} duration="3000" onSlHide={() => setShowSuccess(false)}>
+                    <SlIcon slot="icon" name="exclamation-octagon"></SlIcon>
+                    <strong>Operacion realizada exitosamente</strong><br />
+                </SlAlert>
+            </div>
             {!editMode ? (
                 <div className="page-container">
                     <h2 className="page-title">¿A dónde deseas ir?</h2>

@@ -201,11 +201,11 @@ function HomePage() {
                     <form onSubmit={editParkingLot}>
                         <div className="form-group">
                             <label className="form-label">Nombre:</label>
-                            <input type="text" className="form-input" value={name} onChange={(e) => setName(e.target.value)} />
+                            <input type="text" minLength={1} className="form-input" value={name} onChange={(e) => setName(e.target.value)} />
                         </div>
                         <div className="form-group">
                             <label className="form-label">Capacidad:</label>
-                            <input type="number" className="form-input" value={capacity} onChange={(e) => setCapacity(e.target.value)} />
+                            <input type="number" min={1} className="form-input" value={capacity} onChange={(e) => setCapacity(e.target.value)} />
                         </div>
                         <div className="button-container">
                             <button onClick={() => setEditMode(false)} className="button">Cancelar</button>

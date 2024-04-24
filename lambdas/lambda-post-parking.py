@@ -24,7 +24,7 @@ def lambda_handler(event, context):
         body = json.loads(event.get("body") or '{}')
 
         parking = dynamo.put_item(
-            TableName='estacionamiento',
+            TableName=os.environ['table_name'],
             Item={
                 'region': {'S': region},
                 'id': {'S': str(uuid.uuid4())},

@@ -9,7 +9,7 @@ def lambda_handler(event, context):
     dynamo = boto3.client('dynamodb')
 
     response = dynamo.get_item(
-        TableName='estacionamiento',
+        TableName=os.environ['table_name'],
         Key={
             'region': {'S': region},
             'id': {'S': id_}

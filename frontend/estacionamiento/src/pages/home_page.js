@@ -177,7 +177,7 @@ function HomePage() {
                             </select>
                         </div>
                     )}
-                    {selectedRegion != 'all' && parkingLots.length === 0 && (
+                    {selectedRegion !== 'all' && parkingLots.length === 0 && (
                         <p className="no-parking-lots">No hay estacionamientos disponibles</p>
                     )
                     }
@@ -188,8 +188,10 @@ function HomePage() {
                                 <button className="button" onClick={() => setEditMode(true)}>Editar</button>
                             </div>
                             <div className="button-container">
-                                <button onClick={handleIncreaseOccupiedSpaces} className="button">Ocupar espacio</button>
-                                <button onClick={handleDecreaseOccupiedSpaces} className="button">Dejar espacio</button>
+                                <button onClick={handleIncreaseOccupiedSpaces} className="button"
+                                    disabled={occupiedSpaces === totalSpaces}>Ocupar espacio</button>
+                                <button onClick={handleDecreaseOccupiedSpaces} className="button"
+                                    disabled={occupiedSpaces === 0}>Dejar espacio</button>
                             </div>
                         </div>
                     )}

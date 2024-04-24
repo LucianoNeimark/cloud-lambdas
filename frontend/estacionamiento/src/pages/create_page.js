@@ -35,14 +35,14 @@ function CreatePage() {
 
     return (
         <>
-            <div style={{"position": "absolute", "right":"2em", "top":"2em"}}>
+            <div style={{ "position": "absolute", "right": "2em", "top": "2em" }}>
                 <SlAlert variant="danger" open={showError} duration="6000" onSlHide={() => setShowError(false)}>
                     <SlIcon slot="icon" name="exclamation-octagon"></SlIcon>
                     <strong>Error creando el estacionamiento</strong><br />
                     Intentalo de nuevo mas tarde
                 </SlAlert>
             </div>
-            <div style={{"position": "absolute", "right":"2em", "top":"2em"}}>
+            <div style={{ "position": "absolute", "right": "2em", "top": "2em" }}>
                 <SlAlert variant="success" open={showSuccess} duration="3000" onSlHide={() => setShowSuccess(false)}>
                     <SlIcon slot="icon" name="exclamation-octagon"></SlIcon>
                     <strong>Estacionamiento creado exitosamente</strong><br />
@@ -60,11 +60,14 @@ function CreatePage() {
                     </div>
                     <div className="form-group">
                         <label className="form-label">Nombre:</label>
-                        <input type="text" className="form-input" value={name} onChange={(e) => setName(e.target.value)} />
+                        <input type="text" className="form-input" value={name} onChange={(e) => setName(e.target.value)}
+                            minLength={1} required
+                        />
                     </div>
                     <div className="form-group">
                         <label className="form-label">Capacidad:</label>
-                        <input type="number" className="form-input" value={totalSpaces} onChange={(e) => setTotalSpaces(e.target.value)} />
+                        <input type="number" className="form-input" value={totalSpaces} onChange={(e) => setTotalSpaces(e.target.value)}
+                            min={1} required />
                     </div>
                     <button type="submit" className="form-button">Crear</button>
                 </form>

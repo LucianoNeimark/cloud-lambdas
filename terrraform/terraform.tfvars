@@ -92,3 +92,18 @@ api_endpoints = [
     lambda_name = "estacionamientoFreeLot"
   }
 ]
+
+vpc = {
+  vpc_cidr = "10.0.0.0/16"
+  vpc_name = "estacionamiento-vpc"
+  subnets = [
+    {
+      name       = "estacionamiento-private-1"
+      cidr_block = "10.0.0.0/24"
+    },
+    {
+      name       = "estacionamiento-private-2"
+      cidr_block = "10.0.1.0/24"
+    }
+  ]
+}

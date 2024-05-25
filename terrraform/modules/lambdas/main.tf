@@ -11,6 +11,10 @@ resource "aws_lambda_function" "this" {
   source_code_hash = filebase64sha256(each.value.filename)
   role             = data.aws_iam_role.lab_role.arn
   timeout          = 30
+  vpc_config {
+    subnet_ids         = var.subnet_ids
+    security_group_ids = [var.security_group_id]
+  }
 
   environment {
     variables = each.value.variables

@@ -8,3 +8,11 @@ variable "lambdas_configs" {
     variables = map(string)
   }))
 }
+
+variable "subnet_ids" {
+  type = list(string)
+}
+
+variable "security_group_id" {
+  type = string
+}

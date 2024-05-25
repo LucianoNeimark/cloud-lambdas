@@ -17,3 +17,14 @@ variable "api_endpoints" {
     lambda_name = string
   }))
 }
+
+variable "vpc" {
+  type = object({
+    vpc_cidr = string
+    vpc_name = string
+    subnets = list(object({
+      name       = string
+      cidr_block = string
+    }))
+  })
+}

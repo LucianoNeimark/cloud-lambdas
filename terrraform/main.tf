@@ -1,6 +1,17 @@
+module "vpc" {
+  source             = "./modules/vpc"
+  vpc_cidr           = var.vpc.vpc_cidr
+  vpc_name           = var.vpc.vpc_name
+  subnets            = var.vpc.subnets
+  availability_zones = slice(data.aws_availability_zones.available, 0, 2)
+}
+
+resource "aws_security_group" "estacionamiento" {
+  vpc_id = module.vpc.vpc_id
+  name   = "estacionamiento"
+}
 
 # DynamoDB table
-
 resource "aws_dynamodb_table" "estacionamiento" {
   name      = "estacionamiento"
   hash_key  = "region"
@@ -19,8 +30,10 @@ resource "aws_dynamodb_table" "estacionamiento" {
 
 # TODO pass role as param
 module "lambdas" {
-  source          = "./modules/lambdas"
-  lambdas_configs = var.lambda_configs
+  source            = "./modules/lambdas"
+  lambdas_configs   = var.lambda_configs
+  subnet_ids        = module.vpc.subnet_ids
+  security_group_id = aws_security_group.estacionamiento.id
 }
 
 module "api-gateway-lambdas" {
@@ -37,7 +50,6 @@ module "api-gateway-lambdas" {
     lambda_name = module.lambdas.created_lambdas[endpoint.lambda_name].function_name
   }]
 }
-
 
 resource "aws_s3_bucket" "estacionamiento_frontend" {
   bucket_prefix = "estacionamiento-frontend"
@@ -103,7 +115,6 @@ resource "null_resource" "modify_file_and_build" {
     npm run build
     EOF
   }
-
   triggers = {
     build_path = "./frontend/estacionamiento/build"
   }

@@ -3,7 +3,7 @@ module "vpc" {
   vpc_cidr           = var.vpc.vpc_cidr
   vpc_name           = var.vpc.vpc_name
   subnets            = var.vpc.subnets
-  availability_zones = slice(data.aws_availability_zones.available, 0, 2)
+  availability_zones = slice(data.aws_availability_zones.available.names, 0, 2)
 }
 
 resource "aws_security_group" "estacionamiento" {

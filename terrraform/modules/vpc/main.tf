@@ -7,7 +7,7 @@ resource "aws_vpc" "this" {
 }
 
 resource "aws_subnet" "this" {
-  for_each = zipmap(range(length(var.subnets)), var.subnets)
+  for_each = zipmap(range(length(var.subnets)), var.subnets) # Check if "zipmap" works properly
   #for_each = { for subnet in var.subnets : subnet.name => subnet }
 
   vpc_id            = aws_vpc.this.id

@@ -56,13 +56,13 @@ resource "aws_vpc_endpoint" "dynamodb" {
 }
 
 module "lambdas" {
-  source            = "./modules/lambdas"
-  lambdas_configs   = [for lambda in var.lambda_configs: {
+  source = "./modules/lambdas"
+  lambdas_configs = [for lambda in var.lambda_configs : {
     name      = lambda.name
     handler   = lambda.handler
     runtime   = lambda.runtime
     filename  = lambda.filename
-    role      = data.lab_role.arn
+    role      = data.aws_iam_role.lab_role.arn
     variables = lambda.variables
   }]
   subnet_ids        = module.vpc.private_subnets

@@ -35,6 +35,18 @@ resource "aws_dynamodb_table" "estacionamiento" {
   write_capacity = 1
 }
 
+resource "aws_vpc_endpoint" "dynamodb" {
+  vpc_id            = module.vpc.vpc_id
+  service_name      = "com.amazonaws.us-east-1.dynamodb"
+  vpc_endpoint_type = "Gateway"
+
+  route_table_ids = [module.vpc.private_route_table_id]
+
+  tags = {
+    Name = "${var.vpc.vpc_name}-dynamodb-endpoint"
+  }
+}
+
 module "lambdas" {
   source            = "./modules/lambdas"
   lambdas_configs   = var.lambda_configs

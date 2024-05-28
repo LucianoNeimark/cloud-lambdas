@@ -11,6 +11,7 @@ resource "aws_apigatewayv2_api" "estacionamiento" {
 }
 
 resource "aws_apigatewayv2_integration" "estacionamiento" {
+  depends_on         = [aws_apigatewayv2_api.estacionamiento]
   for_each           = { for endpoint in var.api_gateway_endpoints_configs : endpoint.lambda_name => endpoint }
   api_id             = aws_apigatewayv2_api.estacionamiento.id
   integration_type   = "AWS_PROXY"
@@ -19,6 +20,7 @@ resource "aws_apigatewayv2_integration" "estacionamiento" {
 }
 
 resource "aws_lambda_permission" "apigw_lambda" {
+  depends_on    = [aws_apigatewayv2_integration.estacionamiento]
   for_each      = { for endpoint in var.api_gateway_endpoints_configs : endpoint.lambda_name => endpoint }
   statement_id  = each.value.lambda_name
   action        = "lambda:InvokeFunction"
@@ -28,13 +30,15 @@ resource "aws_lambda_permission" "apigw_lambda" {
 }
 
 resource "aws_apigatewayv2_route" "estacionamiento" {
-  for_each  = { for endpoint in var.api_gateway_endpoints_configs : endpoint.name => endpoint }
-  api_id    = aws_apigatewayv2_api.estacionamiento.id
-  route_key = "${each.value.method} ${each.value.path}"
-  target    = "integrations/${aws_apigatewayv2_integration.estacionamiento[each.value.lambda_name].id}"
+  depends_on = [aws_apigatewayv2_api.estacionamiento]
+  for_each   = { for endpoint in var.api_gateway_endpoints_configs : endpoint.name => endpoint }
+  api_id     = aws_apigatewayv2_api.estacionamiento.id
+  route_key  = "${each.value.method} ${each.value.path}"
+  target     = "integrations/${aws_apigatewayv2_integration.estacionamiento[each.value.lambda_name].id}"
 }
 
 resource "aws_apigatewayv2_stage" "estacionamiento" {
+  depends_on  = [aws_apigatewayv2_route.estacionamiento]
   api_id      = aws_apigatewayv2_api.estacionamiento.id
   name        = "dev"
   auto_deploy = true

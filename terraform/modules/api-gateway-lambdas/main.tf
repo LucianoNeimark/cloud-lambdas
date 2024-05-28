@@ -4,7 +4,7 @@ resource "aws_apigatewayv2_api" "estacionamiento" {
   protocol_type = "HTTP"
 
   cors_configuration {
-    allow_methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    allow_methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
     allow_headers = ["*"]
     allow_origins = ["*"]
   }

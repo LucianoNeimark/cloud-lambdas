@@ -20,4 +20,7 @@ resource "aws_s3_object" "object" {
   source       = "../frontend/estacionamiento/build/${each.value}"
   etag         = filemd5("../frontend/estacionamiento/build/${each.value}")
   content_type = lookup(local.content_types, lower(element(split(".", each.value), length(split(".", each.value)) - 1)), "binary/octet-stream")
+  lifecycle {
+    create_before_destroy = true
+  }
 }

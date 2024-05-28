@@ -1,4 +1,6 @@
 #!/bin/bash
+cd terraform
+
 terraform init
 
 # Apply the entire Terraform configuration to create the build files

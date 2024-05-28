@@ -3,7 +3,6 @@ lambda_configs = [{
   handler  = "estacionamientoCreate.lambda_handler"
   runtime  = "python3.10"
   filename = "../lambdas/estacionamientoCreate.zip"
-  role     = "LabRole"
   variables = {
     table_name = "estacionamiento"
   }
@@ -12,7 +11,6 @@ lambda_configs = [{
   handler  = "estacionamientoGetByRegion.lambda_handler"
   runtime  = "python3.10"
   filename = "../lambdas/estacionamientoGetByRegion.zip"
-  role     = "LabRole"
   variables = {
     table_name = "estacionamiento"
   }
@@ -21,7 +19,6 @@ lambda_configs = [{
   handler  = "estacionamientoGetById.lambda_handler"
   runtime  = "python3.10"
   filename = "../lambdas/estacionamientoGetById.zip"
-  role     = "LabRole"
   variables = {
     table_name = "estacionamiento"
   }
@@ -30,7 +27,6 @@ lambda_configs = [{
   handler  = "estacionamientoEditParking.lambda_handler"
   runtime  = "python3.10"
   filename = "../lambdas/estacionamientoEditParking.zip"
-  role     = "LabRole"
   variables = {
     table_name = "estacionamiento"
   }
@@ -39,7 +35,6 @@ lambda_configs = [{
   handler  = "estacionamientoOccupyLot.lambda_handler"
   runtime  = "python3.10"
   filename = "../lambdas/estacionamientoOccupyLot.zip"
-  role     = "LabRole"
   variables = {
     table_name = "estacionamiento"
   }
@@ -48,7 +43,6 @@ lambda_configs = [{
   handler  = "estacionamientoFreeLot.lambda_handler"
   runtime  = "python3.10"
   filename = "../lambdas/estacionamientoFreeLot.zip"
-  role     = "LabRole"
   variables = {
     table_name = "estacionamiento"
   }

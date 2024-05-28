@@ -4,7 +4,6 @@ variable "lambda_configs" {
     handler   = string
     runtime   = string
     filename  = string
-    role      = string
     variables = map(string)
   }))
 }

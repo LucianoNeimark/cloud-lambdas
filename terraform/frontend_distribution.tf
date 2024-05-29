@@ -103,3 +103,32 @@ resource "aws_s3_bucket_policy" "allow_cloudfront_access" {
     ]
   })
 }
+
+
+resource "aws_s3_bucket" "log_bucket" {
+  bucket_prefix = "estacionamiento-log"
+}
+
+resource "aws_s3_bucket_policy" "log_bucket_policy" {
+  bucket = aws_s3_bucket.log_bucket.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "logging.s3.amazonaws.com"
+        }
+        Action = "s3:PutObject"
+        Resource = "${aws_s3_bucket.log_bucket.arn}/*"
+      }
+    ]
+  })
+}
+
+resource "aws_s3_bucket_logging" "example" {
+  bucket        = aws_s3_bucket.estacionamiento_frontend.id
+  target_bucket = aws_s3_bucket.log_bucket.id
+  target_prefix = "log/"
+}

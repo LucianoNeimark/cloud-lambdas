@@ -25,4 +25,13 @@ Cloud Computing: Trabajo Práctico 3
 - `lifecycle`: se usa para crear antes de destruir los recursos para mantener la disponibilidad.
 
 ### Diagrama de arquitectura:
-![Diagrama de arquitectura](./arquitectura.jpeg)
+![Diagrama de arquitectura](./arquitectura.png)
+
+### Participación
+| Nombre | Participación |
+| ------ | ------------- |
+| Paz Aramburu | 20% |
+| Franco De Simone | 20% |
+| Manuel Dizenhaus | 20% |
+| Agustin Gutierrez | 20% |
+| Luciano Neimark | 20% |

@@ -45,9 +45,9 @@ resource "aws_dynamodb_table" "estacionamiento" {
 
 resource "aws_dynamodb_table" "users" {
   name     = "users"
-  hash_key = "email"
+  hash_key = "username"
   attribute {
-    name = "email"
+    name = "username"
     type = "S"
   }
   read_capacity  = 1
@@ -93,6 +93,8 @@ module "api-gateway-lambdas" {
     lambda_arn  = module.lambdas.created_lambdas[endpoint.lambda_name].invoke_arn
     lambda_name = module.lambdas.created_lambdas[endpoint.lambda_name].function_name
   }]
+  user_pool_app_client_id = aws_cognito_user_pool_client.userpool_client.id
+  user_pool_url           = format("%s%s", "https://", aws_cognito_user_pool.estacionamiento.endpoint)
 }
 
 resource "aws_lambda_function" "redirect" {
@@ -142,7 +144,7 @@ resource "aws_cognito_user_pool" "estacionamiento" {
 }
 
 resource "aws_cognito_user_pool_domain" "main" {
-  domain       = "estacionamiento-app-auth"
+  domain       = "estacionamiento-app-auth" # TODO add random string
   user_pool_id = aws_cognito_user_pool.estacionamiento.id
 }
 

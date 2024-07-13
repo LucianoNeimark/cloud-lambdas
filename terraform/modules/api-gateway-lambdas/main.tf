@@ -10,6 +10,18 @@ resource "aws_apigatewayv2_api" "estacionamiento" {
   }
 }
 
+resource "aws_apigatewayv2_authorizer" "estacionamiento" {
+  api_id           = aws_apigatewayv2_api.estacionamiento.id
+  name             = "estacionamiento-authorizer"
+  authorizer_type  = "JWT"
+  identity_sources = ["$request.header.Authorization"]
+
+  jwt_configuration {
+    audience = [var.user_pool_app_client_id]
+    issuer   = var.user_pool_url
+  }
+}
+
 resource "aws_apigatewayv2_integration" "estacionamiento" {
   depends_on         = [aws_apigatewayv2_api.estacionamiento]
   for_each           = { for endpoint in var.api_gateway_endpoints_configs : endpoint.lambda_name => endpoint }
@@ -30,11 +42,12 @@ resource "aws_lambda_permission" "apigw_lambda" {
 }
 
 resource "aws_apigatewayv2_route" "estacionamiento" {
-  depends_on = [aws_apigatewayv2_api.estacionamiento]
-  for_each   = { for endpoint in var.api_gateway_endpoints_configs : endpoint.name => endpoint }
-  api_id     = aws_apigatewayv2_api.estacionamiento.id
-  route_key  = "${each.value.method} ${each.value.path}"
-  target     = "integrations/${aws_apigatewayv2_integration.estacionamiento[each.value.lambda_name].id}"
+  depends_on    = [aws_apigatewayv2_api.estacionamiento]
+  for_each      = { for endpoint in var.api_gateway_endpoints_configs : endpoint.name => endpoint }
+  api_id        = aws_apigatewayv2_api.estacionamiento.id
+  route_key     = "${each.value.method} ${each.value.path}"
+  target        = "integrations/${aws_apigatewayv2_integration.estacionamiento[each.value.lambda_name].id}"
+  authorizer_id = aws_apigatewayv2_authorizer.estacionamiento.id
 }
 
 resource "aws_apigatewayv2_stage" "estacionamiento" {

@@ -14,3 +14,11 @@ variable "api_gateway_endpoints_configs" {
     lambda_name = string
   }))
 }
+
+variable "user_pool_url" {
+  type = string
+}
+
+variable "user_pool_app_client_id" {
+  type = string
+}

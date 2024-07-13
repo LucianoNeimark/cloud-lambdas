@@ -83,3 +83,90 @@ module "api-gateway-lambdas" {
     lambda_name = module.lambdas.created_lambdas[endpoint.lambda_name].function_name
   }]
 }
+
+resource "aws_lambda_function" "redirect" {
+  function_name    = "redirectLambda"
+  handler          = "redirectLambda.lambda_handler"
+  runtime          = "python3.10"
+  filename         = "../lambdas/redirectLambda.zip"
+  source_code_hash = filebase64sha256("../lambdas/redirectLambda.zip")
+  role             = data.aws_iam_role.lab_role.arn
+  timeout          = 30
+
+  environment {
+    variables = {
+      "frontend_url" = aws_s3_bucket_website_configuration.estacionamiento_frontend.website_endpoint
+    }
+  }
+
+  tracing_config {
+    mode = "Active"
+  }
+}
+
+resource "aws_lambda_function_url" "redirect" {
+  function_name      = aws_lambda_function.redirect.function_name
+  authorization_type = "NONE"
+
+  cors {
+    allow_credentials = true
+    allow_origins     = ["*"]
+    allow_methods     = ["*"]
+    allow_headers     = ["date", "keep-alive"]
+    expose_headers    = ["keep-alive", "date"]
+    max_age           = 86400
+  }
+}
+
+resource "aws_cognito_user_pool" "estacionamiento" {
+  name = "estacionamiento"
+
+  email_configuration {
+    email_sending_account = "COGNITO_DEFAULT"
+  }
+
+  auto_verified_attributes = ["email"]
+
+  username_attributes = ["email"]
+}
+
+resource "aws_cognito_user_pool_domain" "main" {
+  domain       = "estacionamiento-app-auth"
+  user_pool_id = aws_cognito_user_pool.estacionamiento.id
+}
+
+resource "aws_cognito_user_pool_client" "userpool_client" {
+  name                                 = "estacionamiento-client"
+  user_pool_id                         = aws_cognito_user_pool.estacionamiento.id
+  callback_urls                        = [aws_lambda_function_url.redirect.function_url]
+  allowed_oauth_flows_user_pool_client = true
+  allowed_oauth_flows                  = ["implicit"]
+  allowed_oauth_scopes                 = ["email", "openid", "profile"]
+  supported_identity_providers         = ["COGNITO"]
+}
+
+
+resource "aws_cognito_user_group" "main" {
+  name         = "estacionamiento-admin"
+  user_pool_id = aws_cognito_user_pool.estacionamiento.id
+}
+
+resource "aws_lambda_function" "addUserToGroup" {
+  function_name    = "addUserToGroup"
+  handler          = "addUserToGroup.lambda_handler"
+  runtime          = "python3.10"
+  filename         = "../lambdas/addUserToGroup.zip"
+  source_code_hash = filebase64sha256("../lambdas/addUserToGroup.zip")
+  role             = data.aws_iam_role.lab_role.arn
+  timeout          = 30
+
+  environment {
+    variables = {
+      "user_pool_id" = aws_cognito_user_pool.estacionamiento.id
+    }
+  }
+
+  tracing_config {
+    mode = "Active"
+  }
+}

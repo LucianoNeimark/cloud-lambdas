@@ -5,6 +5,8 @@ resource "null_resource" "build_with_gateway_endpoint" {
     docker run --name estacionamiento-frontend-builder-container estacionamiento-frontend-builder
     docker cp estacionamiento-frontend-builder-container:/app/build ../frontend/estacionamiento
     docker rm estacionamiento-frontend-builder-container
+    
+    # TODO use aws sync instead of cp
     EOF
   }
   triggers = {

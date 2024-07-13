@@ -15,6 +15,7 @@ def respond(status_code, message):
     }
 
 def lambda_handler(event, context):
+    print(event.get("requestContext"))
     try:
         region = event.get("pathParameters").get("region")
 
@@ -30,7 +31,8 @@ def lambda_handler(event, context):
                 'id': {'S': str(uuid.uuid4())},
                 'name': {'S': body.get("name")},
                 'capacity': {'N': str(body.get("capacity", 0))},  # Default to 0 if capacity is missing
-                'occupied_qty': {'N': str(body.get("occupied_qty", 0))}  # Default to 0 if occupied_qty is missing
+                'occupied_qty': {'N': str(body.get("occupied_qty", 0))},  # Default to 0 if occupied_qty is missing
+                'owner': {'S': event.get("requestContext").get("authorizer").get("claims").get("email")}
             }
         )
 

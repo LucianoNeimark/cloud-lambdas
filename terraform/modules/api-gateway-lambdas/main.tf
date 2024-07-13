@@ -48,6 +48,7 @@ resource "aws_apigatewayv2_route" "estacionamiento" {
   route_key     = "${each.value.method} ${each.value.path}"
   target        = "integrations/${aws_apigatewayv2_integration.estacionamiento[each.value.lambda_name].id}"
   authorizer_id = aws_apigatewayv2_authorizer.estacionamiento.id
+  authorization_type = "JWT"
 }
 
 resource "aws_apigatewayv2_stage" "estacionamiento" {

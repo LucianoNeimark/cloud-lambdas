@@ -21,7 +21,6 @@ def lambda_handler(event, context):
     if 'Item' in parking:
         item = parking['Item']
 
-
         if not 'owner' in item or item['owner'].get('S', '') != userEmail:
             return {
                 'statusCode': 403

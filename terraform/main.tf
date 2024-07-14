@@ -68,47 +68,54 @@ resource "aws_vpc_endpoint" "dynamodb" {
 
 module "lambdas" {
   source = "./modules/lambdas"
-  lambdas_configs = [for lambda in var.lambda_configs : {
+  lambdas_configs = concat([for lambda in var.lambda_configs : {
     name      = lambda.name
     handler   = lambda.handler
     runtime   = lambda.runtime
     filename  = lambda.filename
     role      = data.aws_iam_role.lab_role.arn
     variables = lambda.variables
-  }]
+    }],
+    [{
+      name     = "addUserToGroup"
+      handler  = "addUserToGroup.lambda_handler"
+      runtime  = "python3.10"
+      filename = "../lambdas/addUserToGroup.zip"
+      role     = data.aws_iam_role.lab_role.arn
+      variables = {
+        "user_pool_id" = aws_cognito_user_pool.estacionamiento.id
+      }
+      }, {
+      name     = "redirectLambda"
+      handler  = "redirectLambda.lambda_handler"
+      runtime  = "python3.10"
+      filename = "../lambdas/redirectLambda.zip"
+      role     = data.aws_iam_role.lab_role.arn
+      variables = {
+        "frontend_url" = aws_s3_bucket_website_configuration.estacionamiento_frontend.website_endpoint
+      } }
+    ]
+  )
   subnet_ids        = module.vpc.private_subnets
   security_group_id = aws_security_group.estacionamiento.id
 }
 
-module "api-gateway-lambdas" {
-  source = "./modules/api-gateway-lambdas"
-  api_gateway_config = {
-    name        = "estacionamiento-api"
-    description = "API for estacionamiento"
-  }
-  api_gateway_endpoints_configs = [for endpoint in var.api_endpoints : {
-    name        = endpoint.name
-    path        = endpoint.path
-    method      = endpoint.method
-    lambda_arn  = module.lambdas.created_lambdas[endpoint.lambda_name].invoke_arn
-    lambda_name = module.lambdas.created_lambdas[endpoint.lambda_name].function_name
-  }]
-  user_pool_app_client_id = aws_cognito_user_pool_client.userpool_client.id
-  user_pool_url           = format("%s%s", "https://", aws_cognito_user_pool.estacionamiento.endpoint)
-}
-
-resource "aws_lambda_function" "redirect" {
-  function_name    = "redirectLambda"
-  handler          = "redirectLambda.lambda_handler"
+resource "aws_lambda_function" "post-register" {
+  function_name    = "postRegister"
+  handler          = "postRegister.lambda_handler"
   runtime          = "python3.10"
-  filename         = "../lambdas/redirectLambda.zip"
-  source_code_hash = filebase64sha256("../lambdas/redirectLambda.zip")
+  filename         = "../lambdas/postRegister.zip"
+  source_code_hash = filebase64sha256("../lambdas/postRegister.zip")
   role             = data.aws_iam_role.lab_role.arn
   timeout          = 30
+  vpc_config {
+    subnet_ids         = module.vpc.private_subnets
+    security_group_ids = [aws_security_group.estacionamiento.id]
+  }
 
   environment {
     variables = {
-      "frontend_url" = aws_s3_bucket_website_configuration.estacionamiento_frontend.website_endpoint
+      user_table = "users"
     }
   }
 
@@ -117,8 +124,33 @@ resource "aws_lambda_function" "redirect" {
   }
 }
 
+module "api-gateway-lambdas" {
+  source = "./modules/api-gateway-lambdas"
+  api_gateway_config = {
+    name        = "estacionamiento-api"
+    description = "API for estacionamiento"
+  }
+  api_gateway_endpoints_configs = concat([for endpoint in var.api_endpoints : {
+    name                 = endpoint.name
+    path                 = endpoint.path
+    method               = endpoint.method
+    lambda_arn           = module.lambdas.created_lambdas[endpoint.lambda_name].invoke_arn
+    lambda_name          = module.lambdas.created_lambdas[endpoint.lambda_name].function_name
+    authorization_scopes = endpoint.authorization_scopes
+    }], [{
+    name                 = "addUserToAdmin"
+    path                 = "/become-admin"
+    method               = "POST"
+    lambda_arn           = module.lambdas.created_lambdas["addUserToGroup"].invoke_arn
+    lambda_name          = module.lambdas.created_lambdas["addUserToGroup"].function_name
+    authorization_scopes = []
+  }])
+  user_pool_app_client_id = aws_cognito_user_pool_client.userpool_client.id
+  user_pool_url           = format("%s%s", "https://", aws_cognito_user_pool.estacionamiento.endpoint)
+}
+
 resource "aws_lambda_function_url" "redirect" {
-  function_name      = aws_lambda_function.redirect.function_name
+  function_name      = module.lambdas.created_lambdas["redirectLambda"].function_name
   authorization_type = "NONE"
 
   cors {
@@ -141,10 +173,18 @@ resource "aws_cognito_user_pool" "estacionamiento" {
   auto_verified_attributes = ["email"]
 
   username_attributes = ["email"]
+
+  lambda_config {
+    post_confirmation = aws_lambda_function.post-register.arn
+  }
+}
+
+resource "random_id" "random" {
+  byte_length = 8
 }
 
 resource "aws_cognito_user_pool_domain" "main" {
-  domain       = "estacionamiento-app-auth-3" # TODO add random string
+  domain       = "estacionamiento-app-auth-${random_id.random.hex}"
   user_pool_id = aws_cognito_user_pool.estacionamiento.id
 }
 
@@ -158,28 +198,7 @@ resource "aws_cognito_user_pool_client" "userpool_client" {
   supported_identity_providers         = ["COGNITO"]
 }
 
-
 resource "aws_cognito_user_group" "main" {
   name         = "estacionamiento-admin"
   user_pool_id = aws_cognito_user_pool.estacionamiento.id
-}
-
-resource "aws_lambda_function" "addUserToGroup" {
-  function_name    = "addUserToGroup"
-  handler          = "addUserToGroup.lambda_handler"
-  runtime          = "python3.10"
-  filename         = "../lambdas/addUserToGroup.zip"
-  source_code_hash = filebase64sha256("../lambdas/addUserToGroup.zip")
-  role             = data.aws_iam_role.lab_role.arn
-  timeout          = 30
-
-  environment {
-    variables = {
-      "user_pool_id" = aws_cognito_user_pool.estacionamiento.id
-    }
-  }
-
-  tracing_config {
-    mode = "Active"
-  }
 }

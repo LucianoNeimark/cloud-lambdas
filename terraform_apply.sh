@@ -1,4 +1,10 @@
 #!/bin/bash
+
+cd lambdas
+./prepare_lambdas.sh
+
+cd ..
+
 cd terraform
 
 terraform init

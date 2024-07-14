@@ -7,11 +7,12 @@ variable "api_gateway_config" {
 
 variable "api_gateway_endpoints_configs" {
   type = list(object({
-    name        = string
-    path        = string
-    method      = string
-    lambda_arn  = string
-    lambda_name = string
+    name                 = string
+    path                 = string
+    method               = string
+    lambda_arn           = string
+    lambda_name          = string
+    authorization_scopes = list(string)
   }))
 }
 

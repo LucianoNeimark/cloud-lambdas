@@ -10,10 +10,11 @@ variable "lambda_configs" {
 
 variable "api_endpoints" {
   type = list(object({
-    name        = string
-    method      = string
-    path        = string
-    lambda_name = string
+    name                 = string
+    method               = string
+    path                 = string
+    lambda_name          = string
+    authorization_scopes = list(string)
   }))
 }
 

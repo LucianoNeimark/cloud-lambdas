@@ -20,7 +20,8 @@ lambda_configs = [{
   runtime  = "python3.10"
   filename = "../lambdas/estacionamientoGetById.zip"
   variables = {
-    table_name = "estacionamiento"
+    table_name = "estacionamiento",
+    user_table = "users"
   }
   }, {
   name     = "estacionamientoEditParking"
@@ -36,7 +37,8 @@ lambda_configs = [{
   runtime  = "python3.10"
   filename = "../lambdas/estacionamientoOccupyLot.zip"
   variables = {
-    table_name = "estacionamiento"
+    table_name = "estacionamiento",
+    user_table = "users"
   }
   }, {
   name     = "estacionamientoFreeLot"
@@ -44,46 +46,53 @@ lambda_configs = [{
   runtime  = "python3.10"
   filename = "../lambdas/estacionamientoFreeLot.zip"
   variables = {
-    table_name = "estacionamiento"
+    table_name = "estacionamiento",
+    user_table = "users"
   }
 }]
 
 api_endpoints = [
   {
-    name        = "estacionamientoCreate"
-    method      = "POST"
-    path        = "/parking/{region}"
-    lambda_name = "estacionamientoCreate"
+    name                 = "estacionamientoCreate"
+    method               = "POST"
+    path                 = "/parking/{region}"
+    lambda_name          = "estacionamientoCreate"
+    authorization_scopes = ["admin"]
   },
   {
-    name        = "estacionamientoGetByRegion"
-    method      = "GET"
-    path        = "/parking/{region}"
-    lambda_name = "estacionamientoGetByRegion"
+    name                 = "estacionamientoGetByRegion"
+    method               = "GET"
+    path                 = "/parking/{region}"
+    lambda_name          = "estacionamientoGetByRegion"
+    authorization_scopes = []
   },
   {
-    name        = "estacionamientoGetById"
-    method      = "GET"
-    path        = "/parking/{region}/{id}"
-    lambda_name = "estacionamientoGetById"
+    name                 = "estacionamientoGetById"
+    method               = "GET"
+    path                 = "/parking/{region}/{id}"
+    lambda_name          = "estacionamientoGetById"
+    authorization_scopes = []
   },
   {
-    name        = "estacionamientoEditParking"
-    method      = "PATCH"
-    path        = "/parking/{region}/{id}"
-    lambda_name = "estacionamientoEditParking"
+    name                 = "estacionamientoEditParking"
+    method               = "PATCH"
+    path                 = "/parking/{region}/{id}"
+    lambda_name          = "estacionamientoEditParking"
+    authorization_scopes = ["admin"]
   },
   {
-    name        = "estacionamientoOccupyLot"
-    method      = "POST"
-    path        = "/parking/{region}/{id}/lot"
-    lambda_name = "estacionamientoOccupyLot"
+    name                 = "estacionamientoOccupyLot"
+    method               = "POST"
+    path                 = "/parking/{region}/{id}/lot"
+    lambda_name          = "estacionamientoOccupyLot"
+    authorization_scopes = []
   },
   {
-    name        = "estacionamientoFreeLot"
-    method      = "DELETE"
-    path        = "/parking/{region}/{id}/lot"
-    lambda_name = "estacionamientoFreeLot"
+    name                 = "estacionamientoFreeLot"
+    method               = "DELETE"
+    path                 = "/parking/{region}/{id}/lot"
+    lambda_name          = "estacionamientoFreeLot"
+    authorization_scopes = []
   }
 ]
 

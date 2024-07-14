@@ -23,6 +23,7 @@ def lambda_handler(event, context):
             return respond(400, "Region parameter is required.")
 
         body = json.loads(event.get("body") or '{}')
+        
 
         parking = dynamo.put_item(
             TableName=os.environ['table_name'],

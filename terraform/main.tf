@@ -144,7 +144,7 @@ resource "aws_cognito_user_pool" "estacionamiento" {
 }
 
 resource "aws_cognito_user_pool_domain" "main" {
-  domain       = "estacionamiento-app-auth" # TODO add random string
+  domain       = "estacionamiento-app-auth-3" # TODO add random string
   user_pool_id = aws_cognito_user_pool.estacionamiento.id
 }
 

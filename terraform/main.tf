@@ -210,3 +210,12 @@ resource "aws_cognito_user_group" "main" {
   name         = "estacionamiento-admin"
   user_pool_id = aws_cognito_user_pool.estacionamiento.id
 }
+
+resource "terraform_data" "cognito_hosted_ui_url" {
+  input = "https://${aws_cognito_user_pool_domain.main.domain}.auth.${data.aws_region.current.name}.amazoncognito.com/oauth2/authorize?response_type=token&scope=email+openid+profile&client_id=${aws_cognito_user_pool_client.userpool_client.id}&redirect_uri=${aws_lambda_function_url.redirect.function_url}"
+  triggers_replace = [
+    aws_cognito_user_pool.estacionamiento.endpoint,
+    aws_cognito_user_pool_client.userpool_client.id,
+    aws_lambda_function_url.redirect.function_url
+  ]
+}

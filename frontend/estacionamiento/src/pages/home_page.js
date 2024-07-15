@@ -3,6 +3,28 @@ import './home_page.css';
 import { regionOptions } from '../constants';
 import SlAlert from '@shoelace-style/shoelace/dist/react/alert';
 import SlIcon from '@shoelace-style/shoelace/dist/react/icon';
+import { useLocation } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
+
+
+const useToken = () => {
+    const location = useLocation();
+    const [token, setToken] = useState(null);
+
+    useEffect(() => {
+        // console.log('Location:', location);
+        const hash = location.hash.substring(1); // Elimina el primer carácter (#)
+        // console.log('Hash:', hash);
+        const queryParams = new URLSearchParams(hash);
+        const token = queryParams.get('access_token');
+        // console.log('Extracted token:', token);
+        if (token) {
+            setToken(token);
+        }
+    }, [location]);
+
+    return token;
+};
 
 function HomePage() {
     const [parkingLots, setParkingLots] = useState([]);
@@ -11,6 +33,7 @@ function HomePage() {
     const [totalSpaces, setTotalSpaces] = useState(0);
     const [freeSpaces, setFreeSpaces] = useState(0);
     const [selectedRegion, setSelectedRegion] = useState('all');
+    const [isAdmin, setIsAdmin] = useState(false);
 
     // Edit form state
     const [editMode, setEditMode] = useState(false);
@@ -138,6 +161,25 @@ function HomePage() {
             console.error('Error increasing occupied spaces:', error);
         }
     };
+
+    const token = useToken();
+
+    useEffect(() => {
+        // console.log('Token from useToken:', token);
+        if (token !== null) {
+            try {
+                const decodedToken = jwtDecode(token);
+                if(decodedToken && decodedToken['cognito:groups']) {
+                    setIsAdmin(decodedToken['cognito:groups'].includes('estacionamiento-admin'));
+                }
+                console.log('is admin:', isAdmin);
+            } catch (error) {
+                console.error('Error decoding token:', error);
+            }
+        } else {
+            console.log('Token not found');
+        }
+    }, [token]);
 
     return (
         <>

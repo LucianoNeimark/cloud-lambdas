@@ -124,6 +124,14 @@ resource "aws_lambda_function" "post-register" {
   }
 }
 
+resource "aws_lambda_permission" "allow_cognito_to_invoke" {
+  statement_id  = "AllowExecutionFromCognito"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.post-register.function_name
+  principal     = "cognito-idp.amazonaws.com"
+  source_arn    = aws_cognito_user_pool.estacionamiento.arn
+}
+
 module "api-gateway-lambdas" {
   source = "./modules/api-gateway-lambdas"
   api_gateway_config = {

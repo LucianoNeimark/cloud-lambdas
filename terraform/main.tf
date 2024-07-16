@@ -3,10 +3,13 @@ module "vpc" {
 
   name = var.vpc.vpc_name
   cidr = var.vpc.vpc_cidr
-
+  
   azs                  = slice(data.aws_availability_zones.available.names, 0, 2)
   private_subnets      = [for subnet in var.vpc.subnets : subnet.cidr_block]
   private_subnet_names = [for subnet in var.vpc.subnets : subnet.name]
+  public_subnets       = [for subnet in var.vpc.public_subnets : subnet.cidr_block]
+  public_subnet_names  = [for subnet in var.vpc.public_subnets : subnet.name]
+  enable_nat_gateway   = true
 
   tags = {
     Name = var.vpc.vpc_name

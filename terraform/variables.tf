@@ -26,5 +26,9 @@ variable "vpc" {
       name       = string
       cidr_block = string
     }))
+    public_subnets = list(object({
+      name       = string
+      cidr_block = string
+    }))
   })
 }

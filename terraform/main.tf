@@ -3,7 +3,7 @@ module "vpc" {
 
   name = var.vpc.vpc_name
   cidr = var.vpc.vpc_cidr
-  
+
   azs                  = slice(data.aws_availability_zones.available.names, 0, 2)
   private_subnets      = [for subnet in var.vpc.subnets : subnet.cidr_block]
   private_subnet_names = [for subnet in var.vpc.subnets : subnet.name]
@@ -87,6 +87,14 @@ module "lambdas" {
       role     = data.aws_iam_role.lab_role.arn
       variables = {
         "frontend_url" = aws_s3_bucket_website_configuration.estacionamiento_frontend.website_endpoint
+      } }, {
+      name     = "addUserToGroup"
+      handler  = "addUserToGroup.lambda_handler"
+      runtime  = "python3.10"
+      filename = "../lambdas/addUserToGroup.zip"
+      role     = data.aws_iam_role.lab_role.arn
+      variables = {
+        "user_pool_id" = aws_cognito_user_pool.estacionamiento.id
       } }
     ]
   )
@@ -94,6 +102,7 @@ module "lambdas" {
   security_group_id = aws_security_group.estacionamiento.id
 }
 
+# Needs to be separate due to circular dependency
 resource "aws_lambda_function" "post-register" {
   function_name    = "postRegister"
   handler          = "postRegister.lambda_handler"
@@ -110,26 +119,6 @@ resource "aws_lambda_function" "post-register" {
   environment {
     variables = {
       user_table = "users"
-    }
-  }
-
-  tracing_config {
-    mode = "Active"
-  }
-}
-
-resource "aws_lambda_function" "become-admin" {
-  function_name    = "addUserToGroup"
-  handler          = "addUserToGroup.lambda_handler"
-  runtime          = "python3.10"
-  filename         = "../lambdas/addUserToGroup.zip"
-  source_code_hash = filebase64sha256("../lambdas/addUserToGroup.zip")
-  role             = data.aws_iam_role.lab_role.arn
-  timeout          = 30
-
-  environment {
-    variables = {
-      user_pool_id = aws_cognito_user_pool.estacionamiento.id
     }
   }
 
@@ -163,8 +152,8 @@ module "api-gateway-lambdas" {
     name                 = "addUserToAdmin"
     path                 = "/become-admin"
     method               = "POST"
-    lambda_arn           = aws_lambda_function.become-admin.invoke_arn
-    lambda_name          = aws_lambda_function.become-admin.function_name
+    lambda_arn           = module.lambdas.created_lambdas["addUserToGroup"].invoke_arn
+    lambda_name          = module.lambdas.created_lambdas["addUserToGroup"].function_name
     authorization_scopes = []
   }])
   user_pool_app_client_id = aws_cognito_user_pool_client.userpool_client.id

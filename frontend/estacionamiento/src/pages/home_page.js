@@ -271,7 +271,7 @@ function HomePage() {
                         </div>
                         <div className="form-group">
                             <label className="form-label">Capacidad:</label>
-                            <input type="number" min={1} className="form-input" value={capacity} onChange={(e) => setCapacity(e.target.value)} />
+                            <input type="number" min={Math.max(1, occupiedSpaces)} className="form-input" value={capacity} onChange={(e) => setCapacity(e.target.value)} />
                         </div>
                         <div className="button-container">
                             <button onClick={() => setEditMode(false)} className="button">Cancelar</button>

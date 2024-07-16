@@ -77,15 +77,6 @@ module "lambdas" {
     variables = lambda.variables
     }],
     [{
-      name     = "addUserToGroup"
-      handler  = "addUserToGroup.lambda_handler"
-      runtime  = "python3.10"
-      filename = "../lambdas/addUserToGroup.zip"
-      role     = data.aws_iam_role.lab_role.arn
-      variables = {
-        "user_pool_id" = aws_cognito_user_pool.estacionamiento.id
-      }
-      }, {
       name     = "redirectLambda"
       handler  = "redirectLambda.lambda_handler"
       runtime  = "python3.10"
@@ -124,6 +115,26 @@ resource "aws_lambda_function" "post-register" {
   }
 }
 
+resource "aws_lambda_function" "become-admin" {
+  function_name    = "addUserToGroup"
+  handler          = "addUserToGroup.lambda_handler"
+  runtime          = "python3.10"
+  filename         = "../lambdas/addUserToGroup.zip"
+  source_code_hash = filebase64sha256("../lambdas/addUserToGroup.zip")
+  role             = data.aws_iam_role.lab_role.arn
+  timeout          = 30
+
+  environment {
+    variables = {
+      user_pool_id = aws_cognito_user_pool.estacionamiento.id
+    }
+  }
+
+  tracing_config {
+    mode = "Active"
+  }
+}
+
 resource "aws_lambda_permission" "allow_cognito_to_invoke" {
   statement_id  = "AllowExecutionFromCognito"
   action        = "lambda:InvokeFunction"
@@ -149,8 +160,8 @@ module "api-gateway-lambdas" {
     name                 = "addUserToAdmin"
     path                 = "/become-admin"
     method               = "POST"
-    lambda_arn           = module.lambdas.created_lambdas["addUserToGroup"].invoke_arn
-    lambda_name          = module.lambdas.created_lambdas["addUserToGroup"].function_name
+    lambda_arn           = aws_lambda_function.become-admin.invoke_arn
+    lambda_name          = aws_lambda_function.become-admin.function_name
     authorization_scopes = []
   }])
   user_pool_app_client_id = aws_cognito_user_pool_client.userpool_client.id

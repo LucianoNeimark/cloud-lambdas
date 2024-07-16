@@ -17,16 +17,9 @@ resource "null_resource" "build_with_gateway_endpoint" {
   triggers = {
     build_path  = "${module.api-gateway-lambdas.stage_url}"
     login_url   = terraform_data.cognito_hosted_ui_url.output
-    code_change = md5(join("", [for v in fileset("../frontend/estacionamiento/src", "**/*") : filemd5("../frontend/estacionamiento/src/${v}")]))
+    code_change = md5(join("", [for v in fileset("../frontend/estacionamiento/src", "**/**") : filemd5("../frontend/estacionamiento/src/${v}")]))
+    test        = "b"
   }
-}
-
-output "react_app_api_url" {
-  value = module.api-gateway-lambdas.stage_url
-}
-
-output "login_url" {
-  value = terraform_data.cognito_hosted_ui_url.output
 }
 
 resource "aws_s3_object" "object" {

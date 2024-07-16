@@ -82,7 +82,25 @@ function NavigationBar() {
         localStorage.setItem('refresh_token', null);
 
         window.location.href = process.env.REACT_APP_COGNITO_URL + "logout?" + queryParams.toString();
+    }
 
+    const become_creator = async () => {
+        try {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/become-admin`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Failed to become owner');
+            }
+            setIsAdmin(true);
+            logout();
+        } catch (error) {
+            console.error('Error becoming owner:', error);
+        }
     }
 
     return (
@@ -93,15 +111,22 @@ function NavigationBar() {
                     <NavLink exact to="/" className="navbar-link">Inicio</NavLink>
                 </li>
                 <li className="navbar-item">
-                    <NavLink onClick={logout} className="navbar-link">Logout</NavLink>
+                    <NavLink onClick={logout} className="navbar-link">Cerrar sesión</NavLink>
                 </li>
-                <li className="navbar-item">
-                    {
-                        isAdmin && (
+                {
+                    isAdmin && (
+                        <li className="navbar-item">
                             <NavLink to="/crear" className="navbar-link">Nuevo estacionamiento</NavLink>
-                        )
-                    }
-                </li>
+                        </li>
+                    )
+                }
+                {
+                    !isAdmin && (
+                        <li className="navbar-item">
+                            <NavLink onClick={become_creator} className="navbar-link">Convertirse en dueño</NavLink>
+                        </li>
+                    )
+                }
             </ul>
         </nav>
     );

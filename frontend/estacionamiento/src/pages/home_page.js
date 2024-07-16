@@ -8,22 +8,8 @@ import { jwtDecode } from 'jwt-decode';
 
 
 const useToken = () => {
-    const location = useLocation();
-    const [token, setToken] = useState(null);
+    
 
-    useEffect(() => {
-        // console.log('Location:', location);
-        const hash = location.hash.substring(1); // Elimina el primer carácter (#)
-        // console.log('Hash:', hash);
-        const queryParams = new URLSearchParams(hash);
-        const token = queryParams.get('access_token');
-        // console.log('Extracted token:', token);
-        if (token) {
-            setToken(token);
-        }
-    }, [location]);
-
-    return token;
 };
 
 function HomePage() {
@@ -34,6 +20,9 @@ function HomePage() {
     const [freeSpaces, setFreeSpaces] = useState(0);
     const [selectedRegion, setSelectedRegion] = useState('all');
     const [isAdmin, setIsAdmin] = useState(false);
+    const [occupiedByUser, setOccupiedByUser] = useState(false);
+    const [owner, setOwner] = useState('');
+    const [userEmail, setUserEmail] = useState('');
 
     // Edit form state
     const [editMode, setEditMode] = useState(false);
@@ -43,6 +32,7 @@ function HomePage() {
     const [showSuccess, setShowSuccess] = useState(false);
     const base_url = process.env.REACT_APP_API_URL;
 
+
     useEffect(() => {
         setFreeSpaces(totalSpaces - occupiedSpaces);
     }, [occupiedSpaces, totalSpaces]);
@@ -50,21 +40,32 @@ function HomePage() {
     const fetchRegionParkingLots = async (region) => {
         try {
             // Fetch region parking lots from API
-            const response = await fetch(`${base_url}/parking/${region}`);
+            const response = await fetch(`${base_url}/parking/${region}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                },
+            });
             if (!response.ok) {
+                console.log(response)
                 setShowError(true)
                 throw new Error('Failed to fetch region parking lots');
             }
             const data = await response.json();
+            console.log('Data:', data);
             let parsedData = []
             for (let i = 0; i < data.length; i++) {
                 parsedData.push({
                     id: data[i].id.S,
                     name: data[i].name.S,
                     totalSpaces: data[i].capacity.N,
-                    occupiedSpaces: data[i].occupied_qty.N
+                    occupiedSpaces: data[i].occupied_qty.N,
+                    occupiedByUser: data[i].occupiedByUser,
+                    owner: data[i].owner.S
                 })
+                console.log('occupied by user:', data[i].occupiedByUser)
             }
+            console.log(occupiedByUser)
             setShowSuccess(false)
             setParkingLots(parsedData);
         } catch (error) {
@@ -80,6 +81,7 @@ function HomePage() {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 },
                 body: JSON.stringify({ name: name, capacity: capacity }),
             });
@@ -112,6 +114,8 @@ function HomePage() {
         setSelectedParkingLotId(selectedLot.id);
         setName(selectedLot.name);
         setCapacity(selectedLot.totalSpaces);
+        setOccupiedByUser(selectedLot.occupiedByUser);
+        setOwner(selectedLot.owner);        
         if (selectedLot) {
             setOccupiedSpaces(selectedLot.occupiedSpaces);
             setTotalSpaces(selectedLot.totalSpaces);
@@ -125,6 +129,7 @@ function HomePage() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 }
             });
             if (!response.ok) {
@@ -134,6 +139,7 @@ function HomePage() {
             const data = await response.json();
             setShowSuccess(true)
             setOccupiedSpaces(data.occupied_qty);
+            setOccupiedByUser(true);
         }
         catch (error) {
             console.error('Error increasing occupied spaces:', error);
@@ -147,6 +153,7 @@ function HomePage() {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 }
             });
             if (!response.ok) {
@@ -156,13 +163,14 @@ function HomePage() {
             const data = await response.json();
             setShowSuccess(true)
             setOccupiedSpaces(data.occupied_qty);
+            setOccupiedByUser(false);
         }
         catch (error) {
             console.error('Error increasing occupied spaces:', error);
         }
     };
 
-    const token = useToken();
+    const token = localStorage.getItem('token');
 
     useEffect(() => {
         // console.log('Token from useToken:', token);
@@ -172,6 +180,7 @@ function HomePage() {
                 if(decodedToken && decodedToken['cognito:groups']) {
                     setIsAdmin(decodedToken['cognito:groups'].includes('estacionamiento-admin'));
                 }
+                setUserEmail(decodedToken['email']);
                 console.log('is admin:', isAdmin);
             } catch (error) {
                 console.error('Error decoding token:', error);
@@ -227,13 +236,24 @@ function HomePage() {
                         <div className="parking-info-container">
                             <div className="parking-inner-container">
                                 <p className="parking-info">Espacios libres: {freeSpaces} / {totalSpaces}</p>
-                                <button className="button" onClick={() => setEditMode(true)}>Editar</button>
+                                {
+                                    owner === userEmail && (
+                                        <button className="button" onClick={() => setEditMode(true)}>Editar</button>
+                                    )
+                                }
                             </div>
                             <div className="button-container">
+                                {!occupiedByUser && (
                                 <button onClick={handleIncreaseOccupiedSpaces} className="button"
                                     disabled={occupiedSpaces === totalSpaces}>Ocupar espacio</button>
-                                <button onClick={handleDecreaseOccupiedSpaces} className="button"
+                                )
+
+                                }
+                                {occupiedByUser && (
+                                    <button onClick={handleDecreaseOccupiedSpaces} className="button"
                                     disabled={occupiedSpaces === 0}>Dejar espacio</button>
+                                )}
+                                
                             </div>
                         </div>
                     )}

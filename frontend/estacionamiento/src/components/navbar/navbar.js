@@ -4,6 +4,12 @@ import { NavLink, useLocation } from 'react-router-dom';
 import './navbar.css';
 import { jwtDecode } from 'jwt-decode';
 
+const loginParams = new URLSearchParams({
+    client_id: process.env.REACT_APP_CLIENT_ID,
+    redirect_uri: process.env.REACT_APP_REDIRECT_URL,
+    response_type: 'code'
+});
+const loginUrl = process.env.REACT_APP_COGNITO_URL + "login?" + loginParams.toString();
 
 function NavigationBar() {
     const [isAdmin, setIsAdmin] = useState(false);
@@ -18,10 +24,10 @@ function NavigationBar() {
             const newCode = queryParams.get('code');
             if (newCode === null || newCode === 'null') {
                 console.log('Redirecting to login');
-                window.location.href = process.env.REACT_APP_LOGIN_URL;
+                window.location.href = loginUrl;
                 return;
             }
-            const newTokens = await fetch(process.env.REACT_APP_TOKEN_URL, {
+            const newTokens = await fetch(process.env.REACT_APP_COGNITO_URL + "oauth2/token", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
@@ -44,20 +50,21 @@ function NavigationBar() {
             localStorage.setItem('refresh_token', newRefreshToken);
             if (newToken === null || newToken === 'null') {
                 console.log('Redirecting to login');
-                window.location.href = process.env.REACT_APP_LOGIN_URL;
+                window.location.href = loginUrl;
                 return;
             }
             token = newToken;
-            try {
-                const decodedToken = jwtDecode(token);
-                if (decodedToken && decodedToken['cognito:groups']) {
-                    setIsAdmin(decodedToken['cognito:groups'].includes('estacionamiento-admin'));
-                }
-                console.log('is admin:', isAdmin);
-            } catch (error) {
-                console.error('Error decoding token:', error);
-            }
         }
+        try {
+            const decodedToken = jwtDecode(token);
+            if (decodedToken && decodedToken['cognito:groups']) {
+                setIsAdmin(decodedToken['cognito:groups'].includes('estacionamiento-admin'));
+            }
+            console.log('is admin:', isAdmin);
+        } catch (error) {
+            console.error('Error decoding token:', error);
+        }
+
     };
 
 
@@ -66,24 +73,16 @@ function NavigationBar() {
     }, []);
 
     const logout = async () => {
-        await fetch(process.env.REACT_APP_LOGOUT_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams({
-                client_id: process.env.REACT_APP_CLIENT_ID,
-                token: localStorage.getItem('refresh_token')
-            })
-        });
-
-
-        document.cookie = 'cognito=; path=/; domain=.estacionamiento-app-auth-7d8e2a44c26c2d1d.auth.us-east-1.amazoncognito.com; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        let queryParams = new URLSearchParams();
+        queryParams.append('client_id', process.env.REACT_APP_CLIENT_ID);
+        queryParams.append('redirect_uri', process.env.REACT_APP_REDIRECT_URL);
+        queryParams.append('response_type', 'code');
 
         localStorage.setItem('token', null);
         localStorage.setItem('refresh_token', null);
 
-        window.location.href = process.env.REACT_APP_LOGIN_URL;
+        window.location.href = process.env.REACT_APP_COGNITO_URL + "logout?" + queryParams.toString();
+
     }
 
     return (
@@ -93,9 +92,9 @@ function NavigationBar() {
                 <li className="navbar-item">
                     <NavLink exact to="/" className="navbar-link">Inicio</NavLink>
                 </li>
-                {/* <li className="navbar-item">
+                <li className="navbar-item">
                     <NavLink onClick={logout} className="navbar-link">Logout</NavLink>
-                </li> */}
+                </li>
                 <li className="navbar-item">
                     {
                         isAdmin && (

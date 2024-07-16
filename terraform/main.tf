@@ -201,9 +201,13 @@ resource "aws_cognito_user_pool_client" "userpool_client" {
   user_pool_id                         = aws_cognito_user_pool.estacionamiento.id
   callback_urls                        = [aws_lambda_function_url.redirect.function_url]
   allowed_oauth_flows_user_pool_client = true
-  allowed_oauth_flows                  = ["implicit"]
+  allowed_oauth_flows                  = ["code"]
   allowed_oauth_scopes                 = ["email", "openid", "profile"]
   supported_identity_providers         = ["COGNITO"]
+
+  access_token_validity  = 1
+  id_token_validity      = 1
+  refresh_token_validity = 30
 }
 
 resource "aws_cognito_user_group" "main" {
@@ -212,10 +216,18 @@ resource "aws_cognito_user_group" "main" {
 }
 
 resource "terraform_data" "cognito_hosted_ui_url" {
-  input = "https://${aws_cognito_user_pool_domain.main.domain}.auth.${data.aws_region.current.name}.amazoncognito.com/oauth2/authorize?response_type=token&scope=email+openid+profile&client_id=${aws_cognito_user_pool_client.userpool_client.id}&redirect_uri=${aws_lambda_function_url.redirect.function_url}"
+  input = "${terraform_data.cognito_base_url.output}login?response_type=code&client_id=${aws_cognito_user_pool_client.userpool_client.id}&redirect_uri=${aws_lambda_function_url.redirect.function_url}"
   triggers_replace = [
     aws_cognito_user_pool.estacionamiento.endpoint,
     aws_cognito_user_pool_client.userpool_client.id,
     aws_lambda_function_url.redirect.function_url
+  ]
+}
+
+resource "terraform_data" "cognito_base_url" {
+  input = "https://${aws_cognito_user_pool_domain.main.domain}.auth.${data.aws_region.current.name}.amazoncognito.com/"
+  triggers_replace = [
+    aws_cognito_user_pool_domain.main.domain,
+    data.aws_region.current.name
   ]
 }

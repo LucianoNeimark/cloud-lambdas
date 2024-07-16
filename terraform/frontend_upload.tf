@@ -3,7 +3,9 @@ resource "null_resource" "build_with_gateway_endpoint" {
     command = <<EOF
     docker build -t estacionamiento-frontend-builder \
     --build-arg REACT_APP_API_URL=${module.api-gateway-lambdas.stage_url} \
-    --build-arg REACT_APP_LOGIN_URL='${terraform_data.cognito_hosted_ui_url.output}' \
+    --build-arg REACT_APP_CLIENT_ID='${aws_cognito_user_pool_client.userpool_client.id}' \
+    --build-arg REACT_APP_COGNITO_URL='${terraform_data.cognito_base_url.output}' \
+    --build-arg REACT_APP_REDIRECT_URL='${aws_lambda_function_url.redirect.function_url}' \
     ../frontend/estacionamiento    
     docker run --name estacionamiento-frontend-builder-container estacionamiento-frontend-builder
     docker cp estacionamiento-frontend-builder-container:/app/build ../frontend/estacionamiento
@@ -13,8 +15,9 @@ resource "null_resource" "build_with_gateway_endpoint" {
     EOF
   }
   triggers = {
-    build_path = "${module.api-gateway-lambdas.stage_url}"
-    login_url  = terraform_data.cognito_hosted_ui_url.output
+    build_path  = "${module.api-gateway-lambdas.stage_url}"
+    login_url   = terraform_data.cognito_hosted_ui_url.output
+    code_change = md5(join("", [for v in fileset("../frontend/estacionamiento/src", "**/*") : filemd5("../frontend/estacionamiento/src/${v}")]))
   }
 }
 

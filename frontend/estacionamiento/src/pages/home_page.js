@@ -5,6 +5,12 @@ import SlAlert from '@shoelace-style/shoelace/dist/react/alert';
 import SlIcon from '@shoelace-style/shoelace/dist/react/icon';
 import { jwtDecode } from 'jwt-decode';
 
+const loginParams = new URLSearchParams({
+    client_id: process.env.REACT_APP_CLIENT_ID,
+    redirect_uri: process.env.REACT_APP_REDIRECT_URL,
+    response_type: 'code'
+});
+const loginUrl = process.env.REACT_APP_COGNITO_URL + "login?" + loginParams.toString();
 
 function HomePage() {
     const [parkingLots, setParkingLots] = useState([]);
@@ -43,7 +49,7 @@ function HomePage() {
             if (!response.ok) {
                 if (response.status === 401) {
                     localStorage.removeItem('token');
-                    window.location.href = process.env.REACT_APP_LOGIN_URL;
+                    window.location.href = loginUrl;
                 }
                 console.log(response)
                 setShowError(true)

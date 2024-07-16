@@ -47,6 +47,10 @@ function HomePage() {
                 },
             });
             if (!response.ok) {
+                if(response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = process.env.LOGIN_URL;
+                }
                 console.log(response)
                 setShowError(true)
                 throw new Error('Failed to fetch region parking lots');

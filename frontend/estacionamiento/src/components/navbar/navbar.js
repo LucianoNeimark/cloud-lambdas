@@ -18,6 +18,9 @@ function NavigationBar() {
             const queryParams = new URLSearchParams(hash);
             const newToken = queryParams.get('id_token');
             localStorage.setItem('token', newToken);
+            if(newToken === null){
+                window.location.href = process.env.LOGIN_URL;            
+            }
             token = newToken;
         }
         try {

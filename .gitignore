@@ -166,3 +166,4 @@ cython_debug/
 *.tfstate.*
 
 *.DS_Store
+remove_carriage.sh

@@ -12,7 +12,8 @@ lambda_configs = [{
   runtime  = "python3.10"
   filename = "../lambdas/estacionamientoGetByRegion.zip"
   variables = {
-    table_name = "estacionamiento"
+    table_name = "estacionamiento",
+    user_table = "users"
   }
   }, {
   name     = "estacionamientoGetById"

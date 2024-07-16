@@ -3,14 +3,8 @@ import './home_page.css';
 import { regionOptions } from '../constants';
 import SlAlert from '@shoelace-style/shoelace/dist/react/alert';
 import SlIcon from '@shoelace-style/shoelace/dist/react/icon';
-import { useLocation } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 
-
-const useToken = () => {
-    
-
-};
 
 function HomePage() {
     const [parkingLots, setParkingLots] = useState([]);
@@ -47,9 +41,9 @@ function HomePage() {
                 },
             });
             if (!response.ok) {
-                if(response.status === 401) {
+                if (response.status === 401) {
                     localStorage.removeItem('token');
-                    window.location.href = process.env.LOGIN_URL;
+                    window.location.href = process.env.REACT_APP_LOGIN_URL;
                 }
                 console.log(response)
                 setShowError(true)
@@ -119,7 +113,7 @@ function HomePage() {
         setName(selectedLot.name);
         setCapacity(selectedLot.totalSpaces);
         setOccupiedByUser(selectedLot.occupiedByUser);
-        setOwner(selectedLot.owner);        
+        setOwner(selectedLot.owner);
         if (selectedLot) {
             setOccupiedSpaces(selectedLot.occupiedSpaces);
             setTotalSpaces(selectedLot.totalSpaces);
@@ -181,7 +175,7 @@ function HomePage() {
         if (token !== null) {
             try {
                 const decodedToken = jwtDecode(token);
-                if(decodedToken && decodedToken['cognito:groups']) {
+                if (decodedToken && decodedToken['cognito:groups']) {
                     setIsAdmin(decodedToken['cognito:groups'].includes('estacionamiento-admin'));
                 }
                 setUserEmail(decodedToken['email']);
@@ -248,16 +242,16 @@ function HomePage() {
                             </div>
                             <div className="button-container">
                                 {!occupiedByUser && (
-                                <button onClick={handleIncreaseOccupiedSpaces} className="button"
-                                    disabled={occupiedSpaces === totalSpaces}>Ocupar espacio</button>
+                                    <button onClick={handleIncreaseOccupiedSpaces} className="button"
+                                        disabled={occupiedSpaces === totalSpaces}>Ocupar espacio</button>
                                 )
 
                                 }
                                 {occupiedByUser && (
                                     <button onClick={handleDecreaseOccupiedSpaces} className="button"
-                                    disabled={occupiedSpaces === 0}>Dejar espacio</button>
+                                        disabled={occupiedSpaces === 0}>Dejar espacio</button>
                                 )}
-                                
+
                             </div>
                         </div>
                     )}

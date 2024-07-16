@@ -3,7 +3,7 @@ resource "null_resource" "build_with_gateway_endpoint" {
     command = <<EOF
     docker build -t estacionamiento-frontend-builder \
     --build-arg REACT_APP_API_URL=${module.api-gateway-lambdas.stage_url} \
-    --build-arg LOGIN_URL='${terraform_data.cognito_hosted_ui_url.output}' \
+    --build-arg REACT_APP_LOGIN_URL='${terraform_data.cognito_hosted_ui_url.output}' \
     ../frontend/estacionamiento    
     docker run --name estacionamiento-frontend-builder-container estacionamiento-frontend-builder
     docker cp estacionamiento-frontend-builder-container:/app/build ../frontend/estacionamiento
@@ -16,6 +16,14 @@ resource "null_resource" "build_with_gateway_endpoint" {
     build_path = "${module.api-gateway-lambdas.stage_url}"
     login_url  = terraform_data.cognito_hosted_ui_url.output
   }
+}
+
+output "react_app_api_url" {
+  value = module.api-gateway-lambdas.stage_url
+}
+
+output "login_url" {
+  value = terraform_data.cognito_hosted_ui_url.output
 }
 
 resource "aws_s3_object" "object" {

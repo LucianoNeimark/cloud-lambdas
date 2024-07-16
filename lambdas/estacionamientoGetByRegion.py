@@ -15,6 +15,7 @@ def respond(err, res=None):
 
 def lambda_handler(event, context): 
     region = event['pathParameters']['region']
+    userEmail = event.get("requestContext").get("authorizer").get("claims").get("email")
 
     parking = dynamo.query(
         TableName=os.environ['table_name'],
@@ -23,4 +24,19 @@ def lambda_handler(event, context):
         ExpressionAttributeValues={':r': {'S': region}}
     )
 
-    return respond(None, parking['Items'])
+    user = dynamo.get_item(
+        TableName=os.environ['user_table'],
+        Key={
+            'username': {'S': userEmail}
+        }
+    ).get('Item', {})
+
+    parking_spots = []
+
+    for item in parking['Items']:
+        parking_spots.append({
+            **item,
+            'occupiedByUser': user.get('occupied_parking', {}).get('S', '') == region+item['id']['S']
+        })
+
+    return respond(None, parking_spots)

@@ -8,7 +8,14 @@ def lambda_handler(event, context):
     body = json.loads(event['body'])
     dynamo = boto3.client('dynamodb')
 
-    userEmail = event.get("requestContext").get("authorizer").get("claims").get("email")
+    userClaims = event.get("requestContext").get("authorizer").get("claims")
+    if userClaims.get("cognito:groups", []).count("estacionamiento-admin") == 0:
+        return {
+            'statusCode': 403,
+            'body': "You don't have permission to edit parking"
+        }
+
+    userEmail = userClaims.get("email")
 
     parking = dynamo.get_item(
         TableName=os.environ['table_name'],

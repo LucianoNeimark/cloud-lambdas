@@ -21,6 +21,10 @@ def lambda_handler(event, context):
 
         if not region:
             return respond(400, "Region parameter is required.")
+        
+        userClaims = event.get("requestContext").get("authorizer").get("claims")
+        if userClaims.get("cognito:groups", []).count("estacionamiento-admin") == 0:
+            return respond(403, "You don't have permission to create parkings.")
 
         body = json.loads(event.get("body") or '{}')
         
@@ -33,7 +37,7 @@ def lambda_handler(event, context):
                 'name': {'S': body.get("name")},
                 'capacity': {'N': str(body.get("capacity", 0))},  # Default to 0 if capacity is missing
                 'occupied_qty': {'N': str(body.get("occupied_qty", 0))},  # Default to 0 if occupied_qty is missing
-                'owner': {'S': event.get("requestContext").get("authorizer").get("claims").get("email")}
+                'owner': {'S': userClaims.get("email")}
             }
         )
 

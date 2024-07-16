@@ -57,7 +57,7 @@ api_endpoints = [
     method               = "POST"
     path                 = "/parking/{region}"
     lambda_name          = "estacionamientoCreate"
-    authorization_scopes = ["admin"]
+    authorization_scopes = ["estacionamiento-admin"]
   },
   {
     name                 = "estacionamientoGetByRegion"
@@ -78,7 +78,7 @@ api_endpoints = [
     method               = "PATCH"
     path                 = "/parking/{region}/{id}"
     lambda_name          = "estacionamientoEditParking"
-    authorization_scopes = ["admin"]
+    authorization_scopes = ["estacionamiento-admin"]
   },
   {
     name                 = "estacionamientoOccupyLot"

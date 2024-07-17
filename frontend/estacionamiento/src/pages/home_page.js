@@ -23,6 +23,7 @@ function HomePage() {
     const [occupiedByUser, setOccupiedByUser] = useState(false);
     const [owner, setOwner] = useState('');
     const [userEmail, setUserEmail] = useState('');
+    const [occupyingAnotherLot, setOccupyingAnotherLot] = useState(false);
 
     // Edit form state
     const [editMode, setEditMode] = useState(false);
@@ -68,6 +69,9 @@ function HomePage() {
                     owner: data[i].owner.S
                 })
                 console.log('occupied by user:', data[i].occupiedByUser)
+                if (data[i].occupiedByUser) {
+                    setOccupyingAnotherLot(true)
+                }
             }
             console.log(occupiedByUser)
             setShowSuccess(false)
@@ -143,6 +147,14 @@ function HomePage() {
             const data = await response.json();
             setShowSuccess(true)
             setOccupiedSpaces(data.occupied_qty);
+            parkingLots.find(lot => lot.id === selectedParkingLotId).occupiedByUser = true;
+            parkingLots.find(lot => lot.id === selectedParkingLotId).occupiedSpaces = data.occupied_qty;
+            setParkingLots([...parkingLots]);
+            if (parkingLots.find(lot => lot.occupiedByUser)) {
+                setOccupyingAnotherLot(true)
+            } else {
+                setOccupyingAnotherLot(false)
+            }
             setOccupiedByUser(true);
         }
         catch (error) {
@@ -168,6 +180,15 @@ function HomePage() {
             setShowSuccess(true)
             setOccupiedSpaces(data.occupied_qty);
             setOccupiedByUser(false);
+            parkingLots.find(lot => lot.id === selectedParkingLotId).occupiedByUser = false;
+            parkingLots.find(lot => lot.id === selectedParkingLotId).occupiedSpaces = data.occupied_qty;
+            setParkingLots([...parkingLots]);
+            if (parkingLots.find(lot => lot.occupiedByUser)) {
+                setOccupyingAnotherLot(true)
+            } else {
+                setOccupyingAnotherLot(false)
+            }
+
         }
         catch (error) {
             console.error('Error increasing occupied spaces:', error);
@@ -247,15 +268,19 @@ function HomePage() {
                                 }
                             </div>
                             <div className="button-container">
-                                {!occupiedByUser && (
+                                {!occupyingAnotherLot && !occupiedByUser && (
                                     <button onClick={handleIncreaseOccupiedSpaces} className="button"
                                         disabled={occupiedSpaces === totalSpaces}>Ocupar espacio</button>
-                                )
-
-                                }
+                                )}
                                 {occupiedByUser && (
                                     <button onClick={handleDecreaseOccupiedSpaces} className="button"
                                         disabled={occupiedSpaces === 0}>Dejar espacio</button>
+                                )}
+                                {occupyingAnotherLot && !occupiedByUser && (
+                                    <div>
+                                        <span style={{ color: 'red' }}>Ya ocupas un espacio en el estacionamiento {parkingLots.find(lot => lot.occupiedByUser).name}
+                                        </span>
+                                    </div>
                                 )}
 
                             </div>
